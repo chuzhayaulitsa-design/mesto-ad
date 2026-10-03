@@ -14,18 +14,17 @@ const hideInputError = (formElement, inputElement, settings) => {
 
 const checkInputValidity = (formElement, inputElement, settings) => {
   if (inputElement.validity.patternMismatch) {
-    showInputError(
-      formElement,
-      inputElement,
-      inputElement.dataset.errorMessage,
-      settings
-    );
-  } else if (!inputElement.validity.valid) {
+    inputElement.setCustomValidity(inputElement.dataset.errorMessage);
+  } else {
+    inputElement.setCustomValidity("");
+  }
+
+  if (!inputElement.validity.valid) {
     showInputError(
       formElement,
       inputElement,
       inputElement.validationMessage,
-      settings
+      settings,
     );
   } else {
     hideInputError(formElement, inputElement, settings);
@@ -37,13 +36,13 @@ const hasInvalidInput = (inputList) => {
 };
 
 const disableSubmitButton = (buttonElement, settings) => {
-  buttonElement.disabled = true;
   buttonElement.classList.add(settings.inactiveButtonClass);
+  buttonElement.disabled = true;
 };
 
 const enableSubmitButton = (buttonElement, settings) => {
-  buttonElement.disabled = false;
   buttonElement.classList.remove(settings.inactiveButtonClass);
+  buttonElement.disabled = false;
 };
 
 const toggleButtonState = (inputList, buttonElement, settings) => {
@@ -56,9 +55,11 @@ const toggleButtonState = (inputList, buttonElement, settings) => {
 
 const setEventListeners = (formElement, settings) => {
   const inputList = Array.from(
-    formElement.querySelectorAll(settings.inputSelector)
+    formElement.querySelectorAll(settings.inputSelector),
   );
-  const buttonElement = formElement.querySelector(settings.submitButtonSelector);
+  const buttonElement = formElement.querySelector(
+    settings.submitButtonSelector,
+  );
 
   toggleButtonState(inputList, buttonElement, settings);
 
@@ -70,23 +71,25 @@ const setEventListeners = (formElement, settings) => {
   });
 };
 
-export const enableValidation = (settings) => {
-  const formList = Array.from(document.querySelectorAll(settings.formSelector));
-
-  formList.forEach((formElement) => {
-    setEventListeners(formElement, settings);
-  });
-};
-
 export const clearValidation = (formElement, settings) => {
   const inputList = Array.from(
-    formElement.querySelectorAll(settings.inputSelector)
+    formElement.querySelectorAll(settings.inputSelector),
   );
-  const buttonElement = formElement.querySelector(settings.submitButtonSelector);
+  const buttonElement = formElement.querySelector(
+    settings.submitButtonSelector,
+  );
 
   inputList.forEach((inputElement) => {
+    inputElement.setCustomValidity("");
     hideInputError(formElement, inputElement, settings);
   });
 
   disableSubmitButton(buttonElement, settings);
+};
+
+export const enableValidation = (settings) => {
+  const formList = Array.from(document.querySelectorAll(settings.formSelector));
+  formList.forEach((formElement) => {
+    setEventListeners(formElement, settings);
+  });
 };
